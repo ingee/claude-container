@@ -1,0 +1,10 @@
+# 개발 컨테이너 공통 bash 설정 (~/.bashrc에서 source된다)
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# 명령줄 편집을 vi 키 바인딩으로 한다
+set -o vi
+
+alias vim=nvim
+alias vi=nvim
+alias gitlog='git log --oneline --graph --all --decorate'

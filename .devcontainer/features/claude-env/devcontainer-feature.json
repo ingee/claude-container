@@ -1,0 +1,13 @@
+{
+  "id": "claude-env",
+  "version": "1.0.0",
+  "name": "Claude Code 개발 환경",
+  "description": "Claude Code(native installer)를 설치하고, mount될 공통 설정(bash, nvim)을 dev 사용자에게 연결한다.",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils",
+    "ghcr.io/devcontainers/features/node",
+    "ghcr.io/devcontainers/features/java",
+    "ghcr.io/devcontainers/features/go",
+    "ghcr.io/devcontainers/features/github-cli"
+  ]
+}

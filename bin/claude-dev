@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# 개발 컨테이너 관리 스크립트
+#   claude-dev up       개발 컨테이너를 만들거나 다시 시작한다
+#   claude-dev refresh  개발 컨테이너를 새로 만들어 common/claude 등 시작 시점 처리를 다시 한다 (빌드 캐시 사용)
+#   claude-dev rebuild  개발 이미지를 캐시 없이 다시 빌드한다 (Dockerfile·Feature 변경, 도구 최신 버전 갱신)
+#   claude-dev shell    개발 컨테이너에 bash로 접속한다 (docker exec -it)
+#   claude-dev down     개발 컨테이너를 중지하고 지운다 (--rm, 컨테이너 상태 volume은 유지된다)
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_FILE="$REPO/.env"
+CONTAINER=claude-dev
+
+load_work_root() {
+  if [ ! -f "$ENV_FILE" ]; then
+    echo "$ENV_FILE 이 없습니다. .env.sample을 복사해 만드세요: cp .env.sample .env" >&2
+    exit 1
+  fi
+  # .env 전체를 source하지 않는다 (docker --env-file 형식이라 따옴표 없이 공백이 들어갈 수 있다).
+  local value
+  value="$(sed -n 's/^WORK_ROOT=//p' "$ENV_FILE" | tail -n 1)"
+  value="${value/#\~/$HOME}"
+  value="${value//\$HOME/$HOME}"
+  if [ -z "$value" ] || [ ! -d "$value" ]; then
+    echo ".env의 WORK_ROOT가 비어 있거나 디렉터리가 아닙니다: '$value'" >&2
+    exit 1
+  fi
+  export WORK_ROOT="$value"
+}
+
+case "${1:-}" in
+  up)
+    load_work_root
+    devcontainer up --workspace-folder "$REPO"
+    ;;
+  refresh)
+    load_work_root
+    devcontainer up --workspace-folder "$REPO" --remove-existing-container
+    ;;
+  rebuild)
+    # Dockerfile과 Feature는 빌드 시점의 latest를 받는다. 캐시를 쓰면 명령 문자열이 같아 옛 버전이 남는다.
+    load_work_root
+    devcontainer up --workspace-folder "$REPO" --remove-existing-container --build-no-cache
+    ;;
+  shell)
+    exec docker exec -it -w /home/dev/work "$CONTAINER" bash
+    ;;
+  down)
+    docker stop "$CONTAINER"
+    ;;
+  *)
+    sed -n '2,7p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    exit 1
+    ;;
+esac
