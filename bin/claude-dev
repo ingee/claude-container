@@ -3,7 +3,7 @@
 #   claude-dev up       개발 컨테이너를 만들거나 다시 시작한다
 #   claude-dev refresh  개발 컨테이너를 새로 만들어 common/claude 등 시작 시점 처리를 다시 한다 (빌드 캐시 사용)
 #   claude-dev rebuild  개발 이미지를 캐시 없이 다시 빌드한다 (Dockerfile·Feature 변경, 도구 최신 버전 갱신)
-#   claude-dev shell    개발 컨테이너에 bash로 접속한다 (docker exec -it)
+#   claude-dev shell    개발 컨테이너에 bash로 접속한다 (WORK_ROOT 아래에서 실행하면 같은 위치로 접속)
 #   claude-dev down     개발 컨테이너를 중지하고 지운다 (--rm, 컨테이너 상태 volume은 유지된다)
 set -euo pipefail
 
@@ -43,7 +43,17 @@ case "${1:-}" in
     devcontainer up --workspace-folder "$REPO" --remove-existing-container --build-no-cache
     ;;
   shell)
-    exec docker exec -it -w /home/dev/work "$CONTAINER" bash
+    # 현재 디렉터리가 WORK_ROOT 아래이면 개발 컨테이너의 같은 위치로 접속한다.
+    # pwd -P로 symlink를 풀고, "$root"/*로 비교해 ~/work2 같은 이름을 ~/work 아래로 보지 않는다.
+    load_work_root
+    dir=/home/dev/work
+    root="$(cd "$WORK_ROOT" && pwd -P)"
+    cur="$(pwd -P)"
+    case "$cur/" in
+      "$root"/*) dir="/home/dev/work${cur#"$root"}" ;;
+    esac
+    # tmux 안에서도 nvim의 색상·키 처리가 맞도록 TERM, COLORTERM을 넘긴다 (docker exec 기본값은 TERM=xterm).
+    exec docker exec -it -e TERM -e COLORTERM -w "$dir" "$CONTAINER" bash
     ;;
   down)
     docker stop "$CONTAINER"

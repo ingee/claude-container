@@ -62,9 +62,7 @@ nvim .env
 # 개발 컨테이너 만들기 / 다시 시작 (처음에는 개발 이미지 빌드로 시간이 걸립니다)
 ./bin/claude-dev up
 
-# 접속
-docker exec -it claude-dev bash
-# 또는
+# 접속 (WORK_ROOT 아래에서 실행하면 개발 컨테이너의 같은 디렉터리로 접속)
 ./bin/claude-dev shell
 
 # 중지 (개발 컨테이너는 지워지고, 컨테이너 상태 volume은 유지됩니다)
@@ -88,6 +86,19 @@ docker exec -it claude-dev bash
 `common/`과 `.devcontainer/scripts/`는 개발 이미지에 복사되지 않고 개발 컨테이너에 읽기 전용으로 mount됩니다. 그래서 공통 설정을 고쳐도 빌드 캐시가 깨지지 않고, `refresh`의 빌드 단계는 모두 캐시로 끝납니다.
 
 `rebuild`가 캐시를 쓰지 않는 이유: Dockerfile과 Feature는 빌드 시점의 최신 버전(`latest`, LTS)을 받아 옵니다. Docker 빌드 캐시는 명령 문자열이 같으면 이전 결과를 재사용하므로, 캐시를 쓰면 새 버전이 나와도 옛 버전이 그대로 남습니다.
+
+`claude-dev shell`은 현재 디렉터리가 `WORK_ROOT` 아래이면 개발 컨테이너의 같은 위치로 접속합니다. 예를 들어 `WORK_ROOT=~/work`일 때 `~/work/proj-a/src`에서 실행하면 `/home/dev/work/proj-a/src`로 접속합니다. `WORK_ROOT` 밖에서 실행하면 `/home/dev/work`로 접속합니다.
+
+### PATH에 등록하기
+
+빌드 레포의 `bin`을 개발머신의 PATH에 추가하면 어느 디렉터리에서나 `claude-dev`로 실행할 수 있습니다.
+
+```bash
+# WSL(bash): ~/.bashrc / Mac: 기본 셸이 zsh이면 ~/.zshrc, bash이면 ~/.bash_profile
+export PATH="$HOME/work/claude-container/bin:$PATH"
+```
+
+`~/.local/bin` 등에 symlink를 만드는 방식은 쓸 수 없습니다. `claude-dev`가 스크립트 위치를 기준으로 빌드 레포와 `.env`를 찾기 때문입니다.
 
 `bin/claude-dev up`은 내부적으로 다음 명령과 같습니다.
 
@@ -185,6 +196,7 @@ glab auth login --hostname "$GITLAB_HOST"  # GitLab 로그인, git 인증 설정
 |---|---|
 | iTerm2 | *Settings → General → Selection → "Applications in terminal may access clipboard"* 켜기 |
 | Windows Terminal | 없음 (기본 지원) |
+| tmux (개발머신) | `~/.tmux.conf`에 `set -s set-clipboard on` |
 
 ## 레포 구조
 
