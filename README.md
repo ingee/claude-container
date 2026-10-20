@@ -34,7 +34,7 @@
 ## 설정 (.env)
 
 ```bash
-git clone <이 레포> ~/work/claude-container
+git clone https://github.com/ingee/claude-container.git ~/work/claude-container
 cd ~/work/claude-container
 cp .env.sample .env
 nvim .env
@@ -202,4 +202,9 @@ common/                      공통 설정 (단일 출처, /opt/claude-container
   shell/bashrc               ~/.bashrc에서 source
 bin/claude-dev               up / refresh / rebuild / shell / down
 .env.sample                  실행 설정 예시
+LICENSE                      MIT 라이선스
 ```
+
+## 라이선스
+
+[MIT](./LICENSE)
