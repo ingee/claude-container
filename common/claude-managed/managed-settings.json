@@ -1,5 +1,4 @@
 {
-  "theme": "light",
   "enabledPlugins": {
     "mattpocock-skills@claude-plugins-official": true
   },

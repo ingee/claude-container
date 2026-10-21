@@ -13,7 +13,7 @@
 | 언어 | node.js LTS(nvm), java LTS(sdkman), go 최신, python3 + uv |
 | 에디터 | neovim 최신 (`vim`, `vi`는 nvim alias), LSP: ts_ls, jdtls, gopls, pyright, lua_ls, bashls |
 | CLI | Claude Code(native installer), gh, glab, git, ripgrep, fd, fzf, jq |
-| Claude 공통 설정 | settings.json, hook(git 가드), 전역 CLAUDE.md, statusline, skills(`ingee/claude-skills`), `mattpocock-skills` 플러그인, atlassian MCP(선택) |
+| Claude 공통 설정 | managed settings, hook(git 가드), 전역 CLAUDE.md, statusline, skills(`ingee/claude-skills`), `mattpocock-skills` 플러그인, atlassian MCP(선택) |
 
 도구 버전은 개발 이미지를 빌드하는 시점의 최신 LTS(또는 최신)입니다. 다른 버전이 필요하면 개발 컨테이너 안에서 `nvm`, `sdk`, `uv python`으로 바꿉니다.
 
@@ -77,7 +77,7 @@ nvim .env
 
 | 하려는 일 | 명령 |
 |---|---|
-| `common/shell/bashrc`, `common/nvim/`의 옵션·키 매핑 변경 반영 | 없음 (새 셸, nvim을 다시 실행하면 반영) |
+| `common/shell/bashrc`, `common/nvim/`의 옵션·키 매핑, `common/claude-managed/` 변경 반영 | 없음 (새 셸, nvim을 다시 실행하면 반영. managed settings는 Claude Code가 바로 다시 읽음) |
 | `common/claude/`, `common/ccstatusline/`, `common/nvim/`의 플러그인·LSP 목록, `post-start.sh` 변경 반영 | `refresh` |
 | `Dockerfile`, `devcontainer.json`의 Feature 변경 반영 (도구 추가·변경) | `rebuild` |
 | 도구를 최신 버전으로 갱신 | `rebuild` |
@@ -157,13 +157,15 @@ skills 레포(`ingee/claude-skills`)는 퍼블릭이라 로그인 없이 첫 시
 
 | 고치는 대상 | 반영 시점 |
 |---|---|
-| `common/claude/` (settings.json, hooks, CLAUDE.md, statusline) | `./bin/claude-dev refresh` 후, 개발 컨테이너가 시작될 때 `~/.claude`에 덮어씁니다 |
+| `common/claude/` (hooks, CLAUDE.md, statusline 스크립트) | `./bin/claude-dev refresh` 후, 개발 컨테이너가 시작될 때 `~/.claude`에 덮어씁니다 |
+| `common/claude-managed/managed-settings.json` (hooks, statusLine, enabledPlugins 등록) | 바로 (Claude Code가 managed settings로 읽고, 개발머신에서 바꿀 수 없습니다) |
 | `common/ccstatusline/settings.json` (statusline의 Model·Ctx % 등 항목) | `./bin/claude-dev refresh` 후, 개발 컨테이너가 시작될 때 `~/.config/ccstatusline`에 덮어씁니다 |
 | `common/nvim/` 옵션·키 매핑 | 바로 (nvim을 다시 실행) |
 | `common/nvim/lua/config/lazy.lua`의 플러그인, `lsp.lua`의 설치 목록 | `./bin/claude-dev refresh` 후, 시작할 때 추가분만 설치합니다 |
 | `common/shell/bashrc` | 바로 (새 셸을 열거나 `source ~/.bashrc`) |
 
-- 개발 컨테이너 안의 `~/.claude/settings.json` 등을 직접 고치면 **다음 시작 때 덮어써집니다** ([ADR 0002](./docs/adr/0002-common-settings-one-way-sync.md)).
+- 개발 컨테이너 안의 `~/.claude/CLAUDE.md` 등을 직접 고치면 **다음 시작 때 덮어써집니다** ([ADR 0002](./docs/adr/0002-common-settings-one-way-sync.md)).
+- `~/.claude/settings.json`은 덮어쓰지 않습니다. `/config`로 고른 테마, 화면 모드 등은 개발 컨테이너마다 유지됩니다.
 - **skills는 예외입니다.** `~/.claude/skills`는 처음 시작할 때만 clone되고, 이후에는 직접 관리합니다.
 
   ```bash
@@ -210,6 +212,7 @@ skills 레포(`ingee/claude-skills`)는 퍼블릭이라 로그인 없이 첫 시
     nvim-plugins.sh          시작 시 nvim 플러그인·LSP·파서 중 없는 것 설치
 common/                      공통 설정 (단일 출처, /opt/claude-container/common에 mount)
   claude/                    ~/.claude에 반영되는 파일
+  claude-managed/            /etc/claude-code에 mount (Claude Code managed settings)
   ccstatusline/              ~/.config/ccstatusline에 반영되는 statusline 설정
   nvim/                      ~/.config/nvim (symlink)
   shell/bashrc               ~/.bashrc에서 source

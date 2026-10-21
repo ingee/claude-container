@@ -12,8 +12,10 @@ log() { echo "[post-start] $*"; }
 # 1. 공통 설정 덮어쓰기 (docs/adr/0002). skills는 제외한다.
 log '공통 설정을 ~/.claude에 반영합니다'
 mkdir -p "$CLAUDE_DIR/hooks"
-cp "$COMMON/claude/settings.json" "$COMMON/claude/CLAUDE.md" \
+cp "$COMMON/claude/CLAUDE.md" \
    "$COMMON/claude/statusline-command.sh" "$COMMON/claude/statusline-wrapper.sh" "$CLAUDE_DIR/"
+# settings.json은 사용자 몫이라 건드리지 않는다. 공통 키는 managed settings
+# (/etc/claude-code/managed-settings.json)로 mount되어 잠긴다.
 cp "$COMMON/claude/hooks/"* "$CLAUDE_DIR/hooks/"
 # statusline의 ccstatusline 설정: ~/.config는 volume이 아니므로 시작할 때마다 다시 쓴다.
 mkdir -p "$HOME/.config/ccstatusline"
@@ -44,6 +46,20 @@ if ! grep -qs '"mattpocock-skills@claude-plugins-official"' "$CLAUDE_DIR/plugins
   log 'mattpocock-skills 플러그인을 설치합니다'
   claude plugin marketplace add anthropics/claude-plugins-official >/dev/null 2>&1 || true
   claude plugin install mattpocock-skills@claude-plugins-official || log '플러그인 설치 실패 (나중에 다시 시도됩니다)'
+fi
+
+# 4-1. ~/.claude/settings.json에서 managed settings와 값이 같은 키를 지운다.
+#      예전에 공통 설정을 복사해 넣은 키와, 플러그인 설치가 써 넣은 enabledPlugins가 대상이다.
+#      값이 다른 키(사용자가 바꾼 값)와 theme, tui 같은 사용자 키는 남긴다.
+settings="$CLAUDE_DIR/settings.json"
+managed=/etc/claude-code/managed-settings.json
+if [ -f "$settings" ] && [ -f "$managed" ]; then
+  if jq --slurpfile m "$managed" '
+      reduce ($m[0] | keys[]) as $k (.; if .[$k] == $m[0][$k] then del(.[$k]) else . end)
+    '"$settings" >"$settings.tmp" 2>/dev/null; then
+    cmp -s "$settings" "$settings.tmp" || { mv "$settings.tmp" "$settings"; log 'settings.json에서 managed settings와 겹치는 키를 정리했습니다'; }
+  fi
+  rm -f "$settings.tmp"
 fi
 
 # 5. atlassian MCP: .env에 Confluence 또는 Jira URL이 있을 때만 등록한다.

@@ -50,6 +50,9 @@
     // 공통 설정과 실행 스크립트: 빌드 레포를 읽기 전용으로 mount한다 (docs/adr/0002)
     "source=${localWorkspaceFolder}/common,target=/opt/claude-container/common,type=bind,readonly",
     "source=${localWorkspaceFolder}/.devcontainer/scripts,target=/opt/claude-container/bin,type=bind,readonly",
+    // Claude Code가 잠그는 공통 키(hooks, statusLine, enabledPlugins): managed settings 디렉터리로 mount한다.
+    // 파일이 아니라 디렉터리를 mount해야 편집기가 파일을 새로 써도 반영된다.
+    "source=${localWorkspaceFolder}/common/claude-managed,target=/etc/claude-code,type=bind,readonly",
     // 컨테이너 상태: 개발머신의 디렉터리와 무관한 Docker named volume
     "source=claude-dev-claude,target=/home/dev/.claude,type=volume",
     "source=claude-dev-gh,target=/home/dev/.config/gh,type=volume",
