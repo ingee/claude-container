@@ -129,10 +129,9 @@ glab auth login --hostname "$GITLAB_HOST"  # GitLab 로그인, git 인증 설정
 ./bin/claude-dev down && ./bin/claude-dev up
 ```
 
-다시 시작하면 다음 두 가지가 처리됩니다.
+다시 시작하면 `gh`가 git HTTPS 인증에 연결됩니다(`gh auth setup-git`). 이후 skills 레포 등에 push할 수 있습니다.
 
-- `gh`가 git HTTPS 인증에 연결됩니다(`gh auth setup-git`).
-- skills 레포(`ingee/claude-skills`)가 `~/.claude/skills`에 clone됩니다. private 레포라서 **gh 로그인 전에는 clone이 실패하는 것이 정상**입니다. 실패하면 시작 로그에 안내가 표시됩니다.
+skills 레포(`ingee/claude-skills`)는 퍼블릭이라 로그인 없이 첫 시작 때 `~/.claude/skills`에 clone됩니다. clone이 실패해도 나머지 시작 작업은 계속 진행되고, 다음 시작 때 다시 시도합니다.
 
 ## 컨테이너 상태와 개발머신의 관계
 

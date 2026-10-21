@@ -21,7 +21,7 @@ cp "$COMMON/claude/hooks/"* "$CLAUDE_DIR/hooks/"
 [ -n "${GIT_USER_EMAIL:-}" ] && git config --global user.email "$GIT_USER_EMAIL"
 # bind mount된 작업 루트의 파일 소유자가 달라도 git이 거부하지 않게 한다.
 git config --global --replace-all safe.directory '*'
-# HTTPS 인증 (skills clone과 push에 쓰인다): 로그인되어 있으면 gh·glab을 credential helper로 쓴다.
+# HTTPS 인증 (push와 private 레포 clone에 쓰인다): 로그인되어 있으면 gh·glab을 credential helper로 쓴다.
 if gh auth status >/dev/null 2>&1; then
   gh auth setup-git
 fi
@@ -32,7 +32,8 @@ fi
 # 3. skills: 없을 때만 clone한다. 이후 갱신은 사용자가 직접 git pull 한다.
 if [ ! -e "$CLAUDE_DIR/skills" ]; then
   log 'skills 레포를 clone합니다'
-  git clone https://github.com/ingee/claude-skills.git "$CLAUDE_DIR/skills" || log 'skills clone 실패: private 레포이므로 gh auth login 후 개발 컨테이너를 다시 시작하세요'
+  # 인증 입력을 기다리며 멈추지 않게 한다. 실패해도 다음 단계는 진행된다.
+  GIT_TERMINAL_PROMPT=0 git clone https://github.com/ingee/claude-skills.git "$CLAUDE_DIR/skills" || log 'skills clone 실패 (다음 시작 때 다시 시도됩니다)'
 fi
 
 # 4. 플러그인: 설치되어 있지 않을 때만 설치한다.
