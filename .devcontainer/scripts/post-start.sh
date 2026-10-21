@@ -15,6 +15,9 @@ mkdir -p "$CLAUDE_DIR/hooks"
 cp "$COMMON/claude/settings.json" "$COMMON/claude/CLAUDE.md" \
    "$COMMON/claude/statusline-command.sh" "$COMMON/claude/statusline-wrapper.sh" "$CLAUDE_DIR/"
 cp "$COMMON/claude/hooks/"* "$CLAUDE_DIR/hooks/"
+# statusline의 ccstatusline 설정: ~/.config는 volume이 아니므로 시작할 때마다 다시 쓴다.
+mkdir -p "$HOME/.config/ccstatusline"
+cp "$COMMON/ccstatusline/settings.json" "$HOME/.config/ccstatusline/"
 
 # 2. git 설정: ~/.gitconfig는 volume이 아니므로 시작할 때마다 다시 쓴다.
 [ -n "${GIT_USER_NAME:-}" ] && git config --global user.name "$GIT_USER_NAME"

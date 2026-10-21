@@ -78,7 +78,7 @@ nvim .env
 | 하려는 일 | 명령 |
 |---|---|
 | `common/shell/bashrc`, `common/nvim/`의 옵션·키 매핑 변경 반영 | 없음 (새 셸, nvim을 다시 실행하면 반영) |
-| `common/claude/`, `common/nvim/`의 플러그인·LSP 목록, `post-start.sh` 변경 반영 | `refresh` |
+| `common/claude/`, `common/ccstatusline/`, `common/nvim/`의 플러그인·LSP 목록, `post-start.sh` 변경 반영 | `refresh` |
 | `Dockerfile`, `devcontainer.json`의 Feature 변경 반영 (도구 추가·변경) | `rebuild` |
 | 도구를 최신 버전으로 갱신 | `rebuild` |
 | nvim 플러그인·LSP를 최신 버전으로 갱신 | nvim 안에서 `:Lazy update`, `:MasonUpdate` |
@@ -158,6 +158,7 @@ skills 레포(`ingee/claude-skills`)는 퍼블릭이라 로그인 없이 첫 시
 | 고치는 대상 | 반영 시점 |
 |---|---|
 | `common/claude/` (settings.json, hooks, CLAUDE.md, statusline) | `./bin/claude-dev refresh` 후, 개발 컨테이너가 시작될 때 `~/.claude`에 덮어씁니다 |
+| `common/ccstatusline/settings.json` (statusline의 Model·Ctx % 등 항목) | `./bin/claude-dev refresh` 후, 개발 컨테이너가 시작될 때 `~/.config/ccstatusline`에 덮어씁니다 |
 | `common/nvim/` 옵션·키 매핑 | 바로 (nvim을 다시 실행) |
 | `common/nvim/lua/config/lazy.lua`의 플러그인, `lsp.lua`의 설치 목록 | `./bin/claude-dev refresh` 후, 시작할 때 추가분만 설치합니다 |
 | `common/shell/bashrc` | 바로 (새 셸을 열거나 `source ~/.bashrc`) |
@@ -209,6 +210,7 @@ skills 레포(`ingee/claude-skills`)는 퍼블릭이라 로그인 없이 첫 시
     nvim-plugins.sh          시작 시 nvim 플러그인·LSP·파서 중 없는 것 설치
 common/                      공통 설정 (단일 출처, /opt/claude-container/common에 mount)
   claude/                    ~/.claude에 반영되는 파일
+  ccstatusline/              ~/.config/ccstatusline에 반영되는 statusline 설정
   nvim/                      ~/.config/nvim (symlink)
   shell/bashrc               ~/.bashrc에서 source
 bin/claude-dev               up / refresh / rebuild / shell / down
