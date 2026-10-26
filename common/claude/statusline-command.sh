@@ -23,7 +23,7 @@ if git -C "$cwd" rev-parse --git-dir > /dev/null 2>&1; then
   # Count untracked files
   untracked=$(git -C "$cwd" --no-optional-locks ls-files --others --exclude-standard 2>/dev/null | wc -l)
 
-  printf '\033[01;36m%s\033[00m | \033[01;32m%s\033[00m | S: \033[01;33m%s\033[00m | U: \033[01;33m%s\033[00m | A: \033[01;33m%s\033[00m' \
+  printf '\033[01;36m%s\033[00m | \033[01;32m⎇ %s\033[00m | S: \033[01;33m%s\033[00m | U: \033[01;33m%s\033[00m | A: \033[01;33m%s\033[00m' \
     "$repo_name" "$branch" "$staged" "$unstaged" "$untracked"
 else
   # Not a git repo
