@@ -26,12 +26,16 @@ cp "$COMMON/ccstatusline/settings.json" "$HOME/.config/ccstatusline/"
 [ -n "${GIT_USER_EMAIL:-}" ] && git config --global user.email "$GIT_USER_EMAIL"
 # bind mount된 작업 루트의 파일 소유자가 달라도 git이 거부하지 않게 한다.
 git config --global --replace-all safe.directory '*'
-# HTTPS 인증 (push와 private 레포 clone에 쓰인다): 로그인되어 있으면 gh·glab을 credential helper로 쓴다.
+# HTTPS 인증 (push와 private 레포 clone에 쓰인다): 로그인되어 있으면 gh를 credential helper로 쓴다.
 if gh auth status >/dev/null 2>&1; then
   gh auth setup-git
 fi
+# GitLab은 glab 토큰을 git HTTPS 인증에 쓰면 거부되므로(API에는 통한다) id/pw를 묻고 8시간 메모리에 둔다.
+# 빈 helper로 앞서 등록된 helper(glab auth login이 넣은 것 포함)를 끊는다.
 if [ -n "${GITLAB_HOST:-}" ]; then
-  git config --global "credential.https://${GITLAB_HOST}.helper" '!glab auth git-credential'
+  git config --global --unset-all "credential.https://${GITLAB_HOST}.helper"
+  git config --global --add "credential.https://${GITLAB_HOST}.helper" ''
+  git config --global --add "credential.https://${GITLAB_HOST}.helper" 'cache --timeout=28800'
 fi
 
 # 3. skills: 없을 때만 clone한다. 이후 갱신은 사용자가 직접 git pull 한다.
