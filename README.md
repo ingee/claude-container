@@ -44,7 +44,7 @@ nvim .env
 |---|---|---|
 | `WORK_ROOT` | 필수 | 개발 컨테이너의 `/home/dev/work`에 mount할 작업 루트. 예) `~/work` |
 | `GIT_USER_NAME`, `GIT_USER_EMAIL` | 권장 | 개발 컨테이너 안 git 커밋 작성자 |
-| `GITLAB_HOST` | 선택 | 회사 GitLab 호스트 이름. glab 기본 호스트와 git HTTPS 인증에 쓰입니다 |
+| `GITLAB_HOST` | 선택 | GitLab 호스트 이름. glab 기본 호스트와 git HTTPS 인증에 쓰입니다 |
 | `CONFLUENCE_URL`, `CONFLUENCE_PERSONAL_TOKEN` | 선택 | 값이 있으면 atlassian MCP가 등록됩니다 |
 | `JIRA_URL`, `JIRA_PERSONAL_TOKEN` | 선택 | 위와 같습니다 |
 
@@ -120,7 +120,7 @@ WORK_ROOT=~/work devcontainer up --workspace-folder ~/work/claude-container
 ```bash
 claude                                   # Claude 로그인
 gh auth login                            # GitHub 로그인 (HTTPS 선택)
-glab auth login --hostname "$GITLAB_HOST"  # GitLab 로그인, git 인증 설정 질문에 Yes
+glab auth login --hostname "$GITLAB_HOST"  # GitLab 로그인, git 인증 설정 질문에 No
 ```
 
 로그인한 뒤 개발 컨테이너를 한 번 다시 시작합니다.
@@ -130,6 +130,8 @@ glab auth login --hostname "$GITLAB_HOST"  # GitLab 로그인, git 인증 설정
 ```
 
 다시 시작하면 `gh`가 git HTTPS 인증에 연결됩니다(`gh auth setup-git`). 이후 skills 레포 등에 push할 수 있습니다.
+
+GitLab(`GITLAB_HOST`)은 glab 토큰을 git HTTPS 인증에 쓰면 거부되므로(API 호출에는 통합니다), git이 개발머신에서처럼 id/pw를 묻습니다. 입력한 값은 메모리에 8시간 보관되고, 개발 컨테이너가 중지되면 사라집니다.
 
 skills 레포(`ingee/claude-skills`)는 퍼블릭이라 로그인 없이 첫 시작 때 `~/.claude/skills`에 clone됩니다. clone이 실패해도 나머지 시작 작업은 계속 진행되고, 다음 시작 때 다시 시도합니다.
 
